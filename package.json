@@ -1,0 +1,23 @@
+{
+  "name": "circleci-digital-ocean-boilerplate",
+  "version": "1.0.0",
+  "description": "**TBD**",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/4doge/circleci-digital-ocean-boilerplate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/4doge/circleci-digital-ocean-boilerplate/issues"
+  },
+  "homepage": "https://github.com/4doge/circleci-digital-ocean-boilerplate#readme",
+  "dependencies": {
+    "koa": "^2.13.0"
+  }
+}

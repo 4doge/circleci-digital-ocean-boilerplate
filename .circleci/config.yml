@@ -1,0 +1,63 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@4.1.0
+  docker: circleci/docker@1.4.0
+  k8s: digitalocean/k8s@0.1.1
+
+jobs:
+  build-project:
+    executor:
+      name: node/default
+      tag: '14.13.1'
+    steps:
+      - checkout
+      - node/install:
+          node-version: 14.13.1
+      - node/install-packages:
+          cache-key: package.json
+  build-and-push-image:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check:
+          registry: ${DOCKER_REGISTRY}
+      - docker/build:
+          image: ${CIRCLE_PROJECT_REPONAME}
+          registry: ${DOCKER_REGISTRY}
+          tag: build-${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+      - docker/push:
+          image: ${CIRCLE_PROJECT_REPONAME}
+          registry: ${DOCKER_REGISTRY}
+          tag: build-${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+  deploy:
+    machine: true
+    steps:
+      - k8s/install
+      - k8s/initialize:
+          cluster: "${K8S_CLUSTER_NAME}"
+      - run:
+          name: Rollout new Docker image
+          command: kubectl set image deployment/${CIRCLE_PROJECT_REPONAME} ${CIRCLE_PROJECT_REPONAME}=${DOCKER_REGISTRY}/${CIRCLE_PROJECT_REPONAME}:build-${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+
+workflows:
+  build-deploy:
+    jobs:
+      - build-project
+      - build-and-push-image:
+          requires:
+            - build-project
+          filters:
+            branches:
+              only:
+                - release
+                - stage
+      - deploy:
+          requires:
+            - build-and-push-image
+          filters:
+            branches:
+              only:
+                - release
+
