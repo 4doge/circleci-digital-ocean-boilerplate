@@ -16,6 +16,9 @@ jobs:
           node-version: 14.13.1
       - node/install-packages:
           cache-key: package.json
+      - run:
+          name: Lint project
+          command: npm run lint
   build-and-push-image:
     executor: docker/docker
     steps:
